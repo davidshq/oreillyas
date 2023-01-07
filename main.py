@@ -1,6 +1,7 @@
 import requests
 import os.path
 import json
+from get_num_of_items import get_num_of_items
 
 """
 Little baby version of Python script that grabs a list of books available from O'Reilly Learning.
@@ -8,57 +9,39 @@ Little baby version of Python script that grabs a list of books available from O
 It works but not best practices.
 """
 
-# result_formats = 'book'
-# per_page = '200'
-# highlight = 0
-# exclude_fields = [
-#     'archive_id',
-#     'has_assessment',
-#     'chapter_title',
-#     'content_format',
-#     'events'
-# ]
-# exclude_fields_str = ''
-# for field in exclude_fields:
-#     exclude_fields_str += '&exclude_fields=' + field
 
+start_page = 0
+current_page = start_page
+# Get the total number of items available for our query from the O'Reilly Search API.
+end_page = 2 # int(get_num_of_items() / 200)
 
-def get_num_of_items():
-    """Get the total number of items available from the O'Reilly Search API."""
-    url = 'https://learning.oreilly.com/api/v2/search/?query=*&formats=book&limit=200&highlight=0&exclude_fields' \
-        '=archive_id&exclude_fields=has_assessment&exclude_fields=chapter_title'
-    response = requests.get(url)
-    json_results = response.json()
-    num_results = json_results['total']
-    print(num_results)
-    return num_results
+# Initialize a variable to track the item we are currently on.
+item_number = 1
 
-
-current_page = 0
-end_page = int(get_num_of_items() / 200)
+# Initialize a dictionary we'll store all the item data in.
 items = {}
 
 while current_page is not end_page + 1:
-    url = 'https://learning.oreilly.com/api/v2/search/?query=*&formats=book&limit=200&highlight=0&exclude_fields' \
+    # The API call we'll be making
+    url = 'https://learning.oreilly.com/api/v2/search/?query=*&formats=book&limit=10&highlight=0&exclude_fields' \
       '=archive_id&exclude_fields=has_assessment&exclude_fields=chapter_title'
 
-    # Make the call, story reply from API in response.
+    # Make the call, store reply from API in response.
     response = requests.get(url)
 
     # Store only the JSON portion of the response
     json_response = response.json()
 
-    # Store only the items portion of the JSON data
     json_items = json_response['results']
+    print(type(json_items))
 
-    # Get URL for next page of results
-    url = json_response['next']
+    for item in json_items:
+        print(f'Item Number: {item_number}')
+        items[item_number] = item
+        item_number += 1
 
-    # For each JSON object in, add an object to our items dictionary
-    for id, item in enumerate(json_items):
-        items[id] = item
     current_page += 1
-    print(current_page)
+    print(f'Current Page: {current_page}')
 
 # Write the dictionary to a file as JSON.
 file = "oreilly.json"
