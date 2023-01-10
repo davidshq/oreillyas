@@ -18,3 +18,9 @@ then writes that dictionary out to a JSON file.
 ## Why It Works This Way
 Each page of results is its own contained JSON, we could concatenate
 the JSON manually, but adding it to the dictionary is easier.
+
+## Loading Data Into SQLite
+You can load the JSON data into whatever backend you want. One easy way to load it
+into SQLite is using [sql-utils](https://sqlite-utils.datasette.io/en/stable/index.html):
+1. `pip install sqlite-utils`
+2. `sqlite-utils insert oreilly.db books oreilly.json`

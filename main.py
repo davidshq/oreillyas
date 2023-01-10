@@ -15,11 +15,8 @@ current_page = start_page
 # Get the total number of items available for our query from the O'Reilly Search API.
 end_page = 2 # int(get_num_of_items() / 200)
 
-# Initialize a variable to track the item we are currently on.
-item_number = 1
-
-# Initialize a dictionary we'll store all the item data in.
-items = {}
+# Initialize a list we'll store all the item data in.
+items = []
 
 while current_page is not end_page + 1:
     # The API call we'll be making
@@ -32,18 +29,18 @@ while current_page is not end_page + 1:
     # Store only the JSON portion of the response
     json_response = response.json()
 
+    # We only need results portion of the JSON
     json_items = json_response['results']
-    print(type(json_items))
 
+    # Add each book to our list
     for item in json_items:
-        print(f'Item Number: {item_number}')
-        items[item_number] = item
-        item_number += 1
+        items.append(item)
 
+    # So we can see progress
     current_page += 1
     print(f'Current Page: {current_page}')
 
-# Write the dictionary to a file as JSON.
+# Write the list to a file as JSON.
 file = "oreilly.json"
 with open(os.path.join(file), 'a+', encoding='utf-8', errors="replace") as outfile:
     json.dump(items, outfile, indent=2)
