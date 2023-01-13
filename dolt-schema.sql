@@ -6,8 +6,8 @@ CREATE TABLE books (
     `issued` DATETIME,
     `format` TEXT,
     `content_format` TEXT,
-    `authors` TEXT,
-    `publishers` TEXT,
+    `authors` JSON,
+    `publishers` JSON,
     `language` TEXT,
     `title` LONGTEXT,
     `description` LONGTEXT,
@@ -23,7 +23,7 @@ CREATE TABLE books (
     `report_score` INTEGER,
     `cover_url` LONGTEXT,
     `date_added` DATETIME,
-    `topics` LONGTEXT,
-    `topics_payload` LONGTEXT,
+    `topics` JSON,
+    `topics_payload` JSON,
     `minutes_required` INTEGER
 )
