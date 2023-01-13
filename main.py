@@ -13,17 +13,31 @@ It works but not best practices.
 start_page = 0
 current_page = start_page
 # Get the total number of items available for our query from the O'Reilly Search API.
-end_page = int(get_num_of_items() / 200) # Use 2 for testing, don't hammer the API
+end_page = int(get_num_of_items() / 200) # Use 1 for testing, don't hammer the API
 
 # Initialize a list we'll store all the item data in.
 items = []
 
-per_page = 200 # Use 10 for testing
+per_page = 200 # Use 5 for testing
+highlight = 0
+
+# Provide a list of fields you want the API NOT TO return.
+exclude_fields = [
+    'academic_excluded',
+    'archive_id',
+    'chapter_title',
+    'duration_seconds',
+    'has_assessment',
+    'source']
+
+# Create a string of query params using the exclude fields above
+exclude_field_string = ''
+for field in exclude_fields:
+    exclude_field_string += f'&exclude_fields={field}'
 
 while current_page is not end_page + 1:
     # The API call we'll be making
-    url = f'https://learning.oreilly.com/api/v2/search/?query=*&formats=book&limit={per_page}&highlight=0&exclude_fields' \
-      '=archive_id&exclude_fields=has_assessment&exclude_fields=chapter_title'
+    url = f'https://learning.oreilly.com/api/v2/search/?query=*&formats=book&limit={per_page}&highlight={highlight}&{exclude_field_string}'
 
     # Make the call, store reply from API in response.
     response = requests.get(url)

@@ -24,3 +24,11 @@ You can load the JSON data into whatever backend you want. One easy way to load 
 into SQLite is using [sql-utils](https://sqlite-utils.datasette.io/en/stable/index.html):
 1. `pip install sqlite-utils`
 2. `sqlite-utils insert oreilly.db books oreilly.json`
+
+
+## Quirks
+
+### Excluding Fields
+You can exclude fields from the results returned by the API but only some fields. For example, 'archive_id' can be excluded but 'num_of_followers' cannot.
+
+You can find a complete list of the excludable fields here: https://www.oreilly.com/online-learning/integration-docs/search.html#/get~api~v2~search~5
