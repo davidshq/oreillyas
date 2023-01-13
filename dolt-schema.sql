@@ -1,7 +1,7 @@
 CREATE TABLE books (
     `id` LONGTEXT NOT NULL,
     `ourn` LONGTEXT,
-    `isbn` INTEGER,
+    `isbn` bigint,
     `last_modified_time` DATETIME,
     `issued` DATETIME,
     `format` TEXT,
