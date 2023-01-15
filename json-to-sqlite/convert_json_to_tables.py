@@ -9,7 +9,7 @@ import json
 import sqlite3
 
 # Load the json into Python
-fname = '../oreilly.json'
+fname = '../oreilly-pid.json'
 str_data = open(fname).read()
 data = json.loads(str_data)
 
