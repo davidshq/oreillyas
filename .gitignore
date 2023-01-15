@@ -2,6 +2,5 @@
 __pycache__
 .dolt
 .vscode
-oreilly.db
-oreilly.json
-oreilly-pid.json
+oreilly*.db
+oreilly*.json
