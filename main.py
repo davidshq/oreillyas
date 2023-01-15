@@ -37,13 +37,14 @@ for field in exclude_fields:
 
 while current_page is not end_page + 1:
     # The API call we'll be making
-    url = f'https://learning.oreilly.com/api/v2/search/?query=*&formats=book&limit={per_page}&highlight={highlight}&{exclude_field_string}'
+    url = f'https://learning.oreilly.com/api/v2/search/?query=*&formats=book&limit={per_page}&highlight={highlight}&{exclude_field_string}&page={current_page}'
 
     # Make the call, store reply from API in response.
     response = requests.get(url)
 
     # Store only the JSON portion of the response
     json_response = response.json()
+    print(json_response)
 
     # We only need results portion of the JSON
     json_items = json_response['results']
