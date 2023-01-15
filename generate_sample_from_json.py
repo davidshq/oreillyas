@@ -6,4 +6,4 @@ with open('oreilly-pid.json') as f:
     records = json.load(f)
 
 with open('oreilly_sample.json', 'w') as f:
-    json.dump(records[:10], f, indent=2)
+    json.dump(records[:400], f, indent=2)
