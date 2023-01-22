@@ -45,7 +45,8 @@ for book in data:
 # Create a set of all the authors in the data list
 authors = set()
 for book in data:
-    for author in book['authors']:
+    book_authors = book.get('authors', '')
+    for author in book_authors:
         authors.add(author)
 
 # Add a row to the authors table for each author in the set
@@ -63,7 +64,8 @@ for (id, author) in enumerate(authors):
 
 # Add a row to the author_books table for each author of each book
 for book in data:
-    for author in book['authors']:
+    authors = book.get('authors', '')
+    for author in authors:
         cur.execute('INSERT INTO author_books (author_id, book_pid) VALUES (?, ?)', (author_ids[author], book['pid']))
 
 # For each unique publisher in the data list add a row to the publishers table with a unique
@@ -72,8 +74,9 @@ for book in data:
 # Create a set of all the publishers in the data list
 publishers = set()
 for book in data:
-    publisher = book.get('publisher', '')
-    publishers.add(publisher)
+    book_publishers = book.get('publishers', '')
+    for publisher in book_publishers:
+        publishers.add(publisher)
 
 # Add a row to the publishers table for each publisher in the set   
 for (id, publisher) in enumerate(publishers):
@@ -90,9 +93,10 @@ for (id, publisher) in enumerate(publishers):
 
 # Add a row to the publisher_books table for each publisher of each book
 for book in data:
-    publisher = book.get('publisher', '')
-    if publisher != '':
-        cur.execute('INSERT INTO publisher_books (publisher_id, book_pid) VALUES (?, ?)', (publisher_ids[book['publisher']], book['pid']))
+    publishers = book.get('publishers', '')
+    for publisher in publishers:
+        if publisher != '':
+            cur.execute('INSERT INTO publisher_books (publisher_id, book_pid) VALUES (?, ?)', (publisher_ids[publisher], book['pid']))
 
 # For each unique topic in the data list add a row to the topics table with a unique
 # id and the topic's name
