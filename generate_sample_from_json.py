@@ -1,4 +1,4 @@
-# Extract the first ten records from oreilly-pid.json and copy them into a new file called oreilly_sample.json
+# Extract the first four hundred records from oreilly-pid.json and copy them into a new file called oreilly_sample.json
 
 import json
 
