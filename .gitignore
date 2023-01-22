@@ -4,3 +4,6 @@ __pycache__
 .vscode
 oreilly*.db
 oreilly*.json
+oreilly.json
+.env
+entire_response.json
