@@ -102,19 +102,19 @@ for book in data:
 # id and the topic's name
 
 # Create a set of all the topics_payload in the data list
-topics = set()
+all_topics = set()
 for book in data:
     for topics_payload in book:
-        topics_payload = book.get('topics_payload', '')
-        for topic_payload in topics_payload:
-            uuid = topic_payload.get('uuid', '')
-            slug = topic_payload.get('slug', '')
-            name = topic_payload.get('name', '')
-            score = topic_payload.get('score', '')
-            topics.add((uuid, slug, name, score))
+        topics = book.get('topics_payload', '')
+        for topic in topics:
+            uuid = topic.get('uuid', '')
+            slug = topic.get('slug', '')
+            name = topic.get('name', '')
+            score = topic.get('score', '')
+            all_topics.add((uuid, slug, name, score))
         
 # Add a row to the topics table for each topic in the set
-for (id, topic) in enumerate(topics):
+for (id, topic) in enumerate(all_topics):
     cur.execute('INSERT INTO topics (id, uuid, slug, name, score) VALUES (?, ?, ?, ?, ?)', (id, topic[0], topic[1], topic[2], topic[3]))
 
 # For each book in the data list add a row to the topic_books table
@@ -123,19 +123,18 @@ for (id, topic) in enumerate(topics):
 # Create a dictionary of topics where the key is the topic's name and the value is the
 # topic's id
 topic_ids = {}
-for (id, topic) in enumerate(topics):
+for (id, topic) in enumerate(all_topics):
     topic_ids[topic] = id
 
 # Add a row to the topic_books table for each topic of each book
 for book in data:
-    for topics_payload in book:
-        topics_payload = book.get('topics_payload', '')
-        for topic_payload in topics_payload:
-            uuid = topic_payload.get('uuid', '')
-            slug = topic_payload.get('slug', '')
-            name = topic_payload.get('name', '')
-            score = topic_payload.get('score', '')
-            cur.execute('INSERT INTO topic_books (topic_id, book_pid) VALUES (?, ?)', (topic_ids[(uuid, slug, name, score)], book['pid']))
+    topics = book.get('topics_payload', '')
+    for topic in topics:
+        uuid = topic.get('uuid', '')
+        slug = topic.get('slug', '')
+        name = topic.get('name', '')
+        score = topic.get('score', '')
+        cur.execute('INSERT INTO topic_books (topic_id, book_pid) VALUES (?, ?)', (topic_ids[(uuid, slug, name, score)], book['pid']))
 
 # Commit the changes and close the connection
 conn.commit()
