@@ -14,7 +14,19 @@ It works but not best practices.
 
 # Load the API key from .env file
 load_dotenv()
-OREILLY_API_KEY = os.getenv('OREILLY_API_KEY')
+
+# Initialize the header var so we don't end up with a potentially
+# unbound error later.
+header = ''
+
+# If we have an API key, create a header.
+if 'OREILLY_API_KEY' in os.environ:
+    OREILLY_API_KEY = os.getenv('OREILLY_API_KEY')
+
+    # Add the API key to the header
+    header = {
+        'Authorization': 'Token {}'.format(OREILLY_API_KEY),
+    }
 
 start_page = 0
 current_page = start_page
@@ -42,16 +54,14 @@ for field in exclude_fields:
     exclude_field_string += f'&exclude_fields={field}'
 
 # Our initial API call 
-url = f'https://learning.oreilly.com/api/v2/search/?query=*&formats=book&limit={per_page}&highlight={highlight}&{exclude_field_string}' # &page={current_page}
-
-# Add the API key to the header
-header = {
-    'Authorization': 'Token {}'.format(OREILLY_API_KEY),
-}
+url = f'https://learning.oreilly.com/api/v2/search/?query=*&formats=book&limit={per_page}&highlight={highlight}&{exclude_field_string}'
 
 while current_page is not end_page + 1:
     # Make the call, store reply from API in response.
-    response = requests.get(url, headers=header)
+    if header: # If we have an API key, use it.
+        response = requests.get(url, headers=header)
+    else:
+        response = requests.get(url)
 
     # Store only the JSON portion of the response
     json_response = response.json()
