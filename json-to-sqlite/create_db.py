@@ -20,7 +20,7 @@ cur.execute('CREATE TABLE author_books (id INTEGER PRIMARY KEY AUTOINCREMENT, au
 
 # Create a table publishers with the columns id (primary key) and name
 cur.execute('DROP TABLE IF EXISTS publishers')
-cur.execute('CREATE TABLE publishers (id INTEGER PRIMARY KEY, name TEXT)')
+cur.execute('CREATE TABLE publishers (id INTEGER PRIMARY KEY, name TEXT, book_count INTEGER)')
 
 # Create a table publisher_books with the columns publisher_id, book_id
 cur.execute('DROP TABLE IF EXISTS publisher_books')

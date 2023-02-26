@@ -1,0 +1,1 @@
+ALTER TABLE publishers ADD COLUMN book_count INTEGER

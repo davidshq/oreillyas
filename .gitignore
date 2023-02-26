@@ -3,6 +3,7 @@ __pycache__
 .dolt
 .vscode
 oreilly*.db
+oreilly*.db*
 oreilly*.json
 oreilly.json
 .env

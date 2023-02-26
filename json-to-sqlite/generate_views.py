@@ -14,7 +14,7 @@ for publisher in publishers:
     view_name = view_name.replace('-', '')
     cur.execute(f"DROP VIEW IF EXISTS {view_name}")
     cur.execute(f"DROP VIEW IF EXISTS {view_name}_view")
-    sql = f"""CREATE VIEW {view_name} AS SELECT b.title, group_concat(a.name) AS "author", p.name AS "publisher", 
+    sql = f"""CREATE VIEW view_{view_name} AS SELECT b.title, group_concat(a.name) AS "author", p.name AS "publisher", 
         b.virtual_pages, b.average_rating, b.report_score, b.popularity, b.issued, b.description, b.url
         FROM publisher_books pb
         LEFT JOIN books b on b.pid = pb.book_pid
@@ -51,7 +51,7 @@ publishers = {
 for publisher in publishers:
     view_name = re.sub("[&:(),./']", '', publisher.replace(' ', '_').replace('&', 'and'))
     view_name = view_name.replace('-', '')
-    cur.execute(f"DROP VIEW IF EXISTS complete_{view_name}")
+    cur.execute(f"DROP VIEW IF EXISTS view_complete_{view_name}")
     sql = f"""CREATE VIEW complete_{view_name} AS SELECT b.title, group_concat(a.name) AS "author", p.name AS "publisher", 
         b.virtual_pages, b.average_rating, b.report_score, b.popularity, b.issued, b.description, b.url
         FROM publisher_books pb
@@ -64,6 +64,21 @@ for publisher in publishers:
         WHERE p.name LIKE "%{publisher}%"
         GROUP BY b.title
     """
-    print(sql)
     cur.execute(sql)
+    conn.commit()
+
+# Create a complete view of books with publishers
+sql = f"""CREATE VIEW complete_books_by_publisher AS SELECT b.title, group_concat(a.name) AS "author", p.name AS "publisher", 
+        b.virtual_pages, b.average_rating, b.report_score, b.popularity, b.issued, b.description, b.url
+        FROM publisher_books pb
+        LEFT JOIN books b on b.pid = pb.book_pid
+        LEFT JOIN publishers p on p.id = pb.publisher_id
+        LEFT JOIN author_books ab on ab.book_pid = b.pid
+        LEFT JOIN authors a on a.id = ab.author_id
+        LEFT JOIN topic_books tb on tb.book_pid = b.pid
+        LEFT JOIN topics t on t.id = tb.topic_id
+        GROUP BY b.title
+    """
+cur.execute(sql)
+conn.commit()
 conn.close()
