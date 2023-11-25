@@ -18,8 +18,9 @@ Has several other useful scripts for transforming the database.
 1. Clone the repository
 2. Install pipenv: `pip install pipenv`
 3. Install dependencies and create virtual environment: `pipenv install`
-4. Tweak any settings you want in `main.py`
-5. Run the script: `python main.py`
+4. Activate the virtual environment: `pipenv shell`
+5. Tweak any settings you want in `main.py`
+6. Run the script: `python main.py`
 
 ## How It Works
 It adds each page of results from the O'Reilly API to a Python dictionary
