@@ -87,6 +87,34 @@ def merge_book(tx, book):
         cover_url=book.get("cover_url", ""),
         id=book.get("id", ""),
         ourn=book.get("ourn", ""))
+    
+def merge_author(tx, author):
+    query = """
+    MERGE (a:Author {
+        name: $name
+    })
+    """
+    if isinstance(author, dict):
+        author_name = author.get("name", "")
+    else:
+        author_name = author
+
+    tx.run(query,
+        name=author_name)
+
+def merge_publisher(tx, publisher):
+    query = """
+    MERGE (a:Publisher {
+        name: $name
+    })
+    """
+    if isinstance(publisher, dict):
+        publisher_name = publisher.get("name", "")
+    else:
+        publisher_name = publisher
+
+    tx.run(query,
+        name=publisher_name)
 
 with GraphDatabase.driver(URI, auth=AUTH) as driver:
     while current_page is not end_page + 1:
@@ -109,6 +137,10 @@ with GraphDatabase.driver(URI, auth=AUTH) as driver:
         with driver.session() as session:
             for book in json_items:
                 session.execute_write(merge_book, book)
+                for author in book.get("authors", []):
+                    session.execute_write(merge_author, author)
+                for publisher in book.get("publishers", []):
+                    session.execute_write(merge_publisher, publisher)
 
         current_page += 1
         print(f"Current Page: {current_page}")
