@@ -26,7 +26,7 @@ if 'OREILLY_API_KEY' in os.environ:
 
 start_page = 0
 current_page = start_page
-end_page = 2 # int(get_num_of_items() / 200)
+end_page = 1 # int(get_num_of_items() / 200)
 
 items = []
 
@@ -115,6 +115,36 @@ def merge_publisher(tx, publisher):
 
     tx.run(query,
         name=publisher_name)
+    
+def merge_topic(tx, topic):
+    query = """
+    MERGE (t:Topic {name: $name, slug: $slug, uuid: $uuid, score: coalesce($score, 0)})
+    """
+    if isinstance(topic, dict):
+        topic_name = topic.get("name", "")
+    else:
+        topic_name = topic
+
+    if isinstance(topic, dict):
+        topic_uuid = topic.get("uuid", "")
+    else:
+        topic_uuid = ""
+    
+    if isinstance(topic, dict):
+        topic_slug = topic.get("slug", "")
+    else:
+        topic_slug = ""
+
+    if isinstance(topic, dict):
+        topic_score = topic.get("score", "")
+    else:
+        topic_score = ""
+
+    tx.run(query,
+        name = topic_name,
+        slug = topic_slug,
+        uuid=topic_uuid,
+        score = topic_score)
 
 with GraphDatabase.driver(URI, auth=AUTH) as driver:
     while current_page is not end_page + 1:
@@ -141,6 +171,10 @@ with GraphDatabase.driver(URI, auth=AUTH) as driver:
                     session.execute_write(merge_author, author)
                 for publisher in book.get("publishers", []):
                     session.execute_write(merge_publisher, publisher)
+                for topic in book.get("topics_payload", []):
+                    print(topic)
+                    session.execute_write(merge_topic, topic)
+
 
         current_page += 1
         print(f"Current Page: {current_page}")
