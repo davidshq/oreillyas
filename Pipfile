@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 python-dotenv = "*"
 requests = "*"
+neo4j = "*"
 
 [dev-packages]
 
