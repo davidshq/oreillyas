@@ -26,11 +26,11 @@ if 'OREILLY_API_KEY' in os.environ:
 
 start_page = 0
 current_page = start_page
-end_page = 1 # int(get_num_of_items() / 200)
+end_page = int(get_num_of_items() / 200) # int(get_num_of_items() / 200) for production, 1 for testing
 
 items = []
 
-per_page = 5 # 200 for production
+per_page = 200 # 200 for production, 10 for testing
 highlight = 0
 
 exclude_fields = [
@@ -145,6 +145,36 @@ def merge_topic(tx, topic):
         slug = topic_slug,
         uuid=topic_uuid,
         score = topic_score)
+    
+# Create relationships between books and authors
+def create_relationships_book(tx, book):
+    for author in book.get("authors", []):
+        tx.run("MATCH (a:Book {isbn: $isbn}) "
+               "MATCH (b:Author {name: $name}) "
+               "MERGE (a)-[:WRITTEN_BY]->(b)",
+               isbn=book.get("isbn", ""),
+               name=author)
+        print(f"Creating relationship between {book.get('title', '')} and {author}")
+        
+# Create relationships between books and publishers
+def create_relationships_publisher(tx, book):
+    for publisher in book.get("publishers", []):
+        tx.run("MATCH (a:Book {isbn: $isbn}) "
+               "MATCH (b:Publisher {name: $name}) "
+               "MERGE (a)-[:PUBLISHED_BY]->(b)",
+               isbn=book.get("isbn", ""),
+               name=publisher)
+        print(f"Creating relationship between {book.get('title', '')} and {publisher}")
+    
+# Create relationships between books and topics
+def create_relationships_topic(tx, book):
+    for topic in book.get("topics_payload", []):
+        tx.run("MATCH (a:Book {isbn: $isbn}) "
+               "MATCH (b:Topic {name: $name}) "
+               "MERGE (a)-[:TAGGED_WITH]->(b)",
+               isbn=book.get("isbn", ""),
+               name=topic)
+        print(f"Creating relationship between {book.get('title', '')} and {topic}")
 
 with GraphDatabase.driver(URI, auth=AUTH) as driver:
     while current_page is not end_page + 1:
@@ -166,14 +196,21 @@ with GraphDatabase.driver(URI, auth=AUTH) as driver:
         # Add to Neo4J database
         with driver.session() as session:
             for book in json_items:
-                session.execute_write(merge_book, book)
-                for author in book.get("authors", []):
-                    session.execute_write(merge_author, author)
-                for publisher in book.get("publishers", []):
-                    session.execute_write(merge_publisher, publisher)
-                for topic in book.get("topics_payload", []):
-                    print(topic)
-                    session.execute_write(merge_topic, topic)
+                try:
+                    session.execute_write(merge_book, book)
+                    for author in book.get("authors", []):
+                        session.execute_write(merge_author, author)
+                    for publisher in book.get("publishers", []):
+                        session.execute_write(merge_publisher, publisher)
+                    for topic in book.get("topics_payload", []):
+                        print(topic)
+                        session.execute_write(merge_topic, topic)
+                    session.execute_write(create_relationships_book, book)
+                    session.execute_write(create_relationships_publisher, book)
+                    session.execute_write(create_relationships_topic, book)
+                except Exception as e:
+                    print(e)
+                    print(f"Error adding {book.get('title', '')} to the database.")
 
 
         current_page += 1
@@ -183,5 +220,4 @@ with GraphDatabase.driver(URI, auth=AUTH) as driver:
         url = next_url
 
         # Don't hammer the API
-        sleep(1)
-
+        sleep(0.5)
