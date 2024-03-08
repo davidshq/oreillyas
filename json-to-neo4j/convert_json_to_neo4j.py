@@ -1,51 +1,19 @@
-# Instead of ending up with a JSON file and a SQLite database, this alternative
-# allows us to import the data into a Neo4j database.
-
 import os
-from time import sleep
-
-import requests
-from neo4j import GraphDatabase
+import json
 from dotenv import load_dotenv
-from get_num_of_items import get_num_of_items
+from neo4j import GraphDatabase
 
 load_dotenv()
 
-URI = os.getenv('NEO4J_URI')
-AUTH = (os.getenv('NEO4J_USERNAME'), os.getenv('NEO4J_PASSWORD'))
+# Load the json into Python
+fname = 'oreilly.json'
+str_data = open(fname).read()
+data = json.loads(str_data)
 
-header = ''
-
-if 'OREILLY_API_KEY' in os.environ:
-    OREILLY_API_KEY = os.getenv('OREILLY_API_KEY')
-
-    # Add the API key to the header
-    header = {
-        'Authorization': 'Token {}'.format(OREILLY_API_KEY),
-    }
-
-start_page = 0
-current_page = start_page
-end_page = int(get_num_of_items() / 200) # int(get_num_of_items() / 200) for production, 1 for testing
-
-items = []
-
-per_page = 200 # 200 for production, 10 for testing
-highlight = 0
-
-exclude_fields = [
-    'academic_excluded',
-    'archive_id',
-    'chapter_title',
-    'duration_seconds',
-    'has_assessment',
-    'source']
-
-exclude_field_string = ''
-for field in exclude_fields:
-    exclude_field_string += f'&exclude_fields={field}'
-
-url = f'https://learning.oreilly.com/api/v2/search/?query=*&formats=book&limit={per_page}&highlight={highlight}&{exclude_field_string}'
+# Initiate the connection to the Neo4j database
+uri = os.getenv('NEO4J_HOST') or ''
+auth = (os.getenv('NEO4J_USERNAME'), os.getenv('NEO4J_PASSWORD'))
+driver = GraphDatabase.driver(uri, auth=auth)
 
 def merge_book(tx, book):
     query = """
@@ -176,48 +144,24 @@ def create_relationships_topic(tx, book):
                name=topic)
         print(f"Creating relationship between {book.get('title', '')} and {topic}")
 
-with GraphDatabase.driver(URI, auth=AUTH) as driver:
-    while current_page is not end_page + 1:
-        if header:  # If we have an API key, use it.
-            response = requests.get(url, headers=header)
-        else:
-            response = requests.get(url)
+with driver.session() as session:
+    for book in data:
+        try:
+            session.execute_write(merge_book, book)
+            for author in book.get("authors", []):
+                session.execute_write(merge_author, author)
+            for publisher in book.get("publishers", []):
+                session.execute_write(merge_publisher, publisher)
+            for topic in book.get("topics_payload", []):
+                print(topic)
+                session.execute_write(merge_topic, topic)
+            session.execute_write(create_relationships_book, book)
+            session.execute_write(create_relationships_publisher, book)
+            session.execute_write(create_relationships_topic, book)
+        except Exception as e:
+            print(e)
+            print(f"Error adding {book.get('title', '')} to the database.")
 
-        json_response = response.json()
+# Close the driver
+driver.close()
 
-        next_url = json_response["next"]
-        print(next_url)
-        if next_url is None:
-            print("No more pages to pull.")
-            break
-
-        json_items = json_response["results"]
-
-        # Add to Neo4J database
-        with driver.session() as session:
-            for book in json_items:
-                try:
-                    session.execute_write(merge_book, book)
-                    for author in book.get("authors", []):
-                        session.execute_write(merge_author, author)
-                    for publisher in book.get("publishers", []):
-                        session.execute_write(merge_publisher, publisher)
-                    for topic in book.get("topics_payload", []):
-                        print(topic)
-                        session.execute_write(merge_topic, topic)
-                    session.execute_write(create_relationships_book, book)
-                    session.execute_write(create_relationships_publisher, book)
-                    session.execute_write(create_relationships_topic, book)
-                except Exception as e:
-                    print(e)
-                    print(f"Error adding {book.get('title', '')} to the database.")
-
-
-        current_page += 1
-        print(f"Current Page: {current_page}")
-
-        # Update URL for next call
-        url = next_url
-
-        # Don't hammer the API
-        sleep(0.5)
