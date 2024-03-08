@@ -1,6 +1,6 @@
 # O'Reilly Learning API Scraper
 
-Version: 0.0.1 2/26/2023
+Version: 0.0.3 3/8/2024
 
 ## Table of Contents
 1. [Description](#description)
