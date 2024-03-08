@@ -56,7 +56,7 @@ for (id, author) in enumerate(authors):
 # For each book in the data list add a row to the author_books table
 # for each author of the book
 
-# Create a dictionary of authors where the key is the author's name and the value is the0
+# Create a dictionary of authors where the key is the author's name and the value is the
 # author's id
 author_ids = {}
 for (id, author) in enumerate(authors):
