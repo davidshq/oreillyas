@@ -1,6 +1,17 @@
 # O'Reilly Learning API Scraper
 
-Version: 0.0.1 2/26/2023
+Version: 0.0.3 3/8/2024
+
+## Table of Contents
+1. [Description](#description)
+2. [Usage](#usage)
+3. [How It Works](#how-it-works)
+4. [Why It Works This Way](#why-it-works-this-way)
+5. [Loading Data Into SQLite](#loading-data-into-sqlite)
+6. [Loading Data Into Neo4j](#loading-data-into-neo4j)
+7. [Quirks](#quirks)
+8. [Secondary Documentation / Scripts](#secondary-documentation--scripts)
+9. [Credits](#credits)
 
 ## Description
 A primitive Python script that pulls down all the available books from the
@@ -18,8 +29,9 @@ Has several other useful scripts for transforming the database.
 1. Clone the repository
 2. Install pipenv: `pip install pipenv`
 3. Install dependencies and create virtual environment: `pipenv install`
-4. Tweak any settings you want in `main.py`
-5. Run the script: `python main.py`
+4. Activate the virtual environment: `pipenv shell`
+5. Tweak any settings you want in `main.py`
+6. Run the script: `python main.py`
 
 ## How It Works
 It adds each page of results from the O'Reilly API to a Python dictionary
@@ -35,15 +47,20 @@ In the `json-to-sqlite` subfolder you'll find three scripts which can be used to
 2. Create a SQLite DB and appropriate tables to contain the data from `oreilly.json`: `create_db.py`
 3. Transform the JSON data from `oreilly.json` into rows of data in the new SQLite DB: `convert_json_to_tables.py`
 
-## Some Useful Views
+### Some Useful Views
 You can optionally create a set of views that may be easier to use than the raw tables. You can add these views by running `/create_views.py`
 
 Currently this generates a view for each publisher as well as a view for publishers with various imprints.
 
 It also generates a view of each book that includes the publisher's name.
 
-## Getting counts of books by publisher
+### Getting counts of books by publisher
 You can populate the `book_counts` column on the `publishers` table with the number of books each publisher has by running `/add_count_to_publishers.py`
+
+## Loading Data Into Neo4j
+In the `json-to-neo4j` subfolder you'll find a script that can be used to load the data from `oreilly.json` into a Neo4j database.
+
+You should have an existing Neo4j database running and have set the host and auth environment variables in the `.env` file.
 
 ## How To: Generate a Sample from JSON results
 The O'Reilly API results can get quite large (well over 100 MB) and can be a bit hard to manipulate in a GUI editor. You may want to run `generate_sample_from_json.py` after running `main.py`. This will take the first 400 records (you can customize the number) and place them in a separate json file (`oreilly_sample.json`) that still gives a good idea of what the results are but in a more manageable size.
