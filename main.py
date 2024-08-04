@@ -1,16 +1,16 @@
-import requests
+import json
 import os
 import os.path
-import json
 from time import sleep
+
+import requests
 from dotenv import load_dotenv
+
 from get_num_of_items import get_num_of_items
 
-"""
-Little baby version of Python script that grabs a list of books available from O'Reilly Learning.
 
-It works but not best practices.
-"""
+# Little baby version of Python script that grabs a list of books available
+# from O'Reilly Learning. It works but not best practices.
 
 # Load the API key from .env file
 load_dotenv()
@@ -31,12 +31,12 @@ if 'OREILLY_API_KEY' in os.environ:
 start_page = 0
 current_page = start_page
 # Get the total number of items available for our query from the O'Reilly Search API.
-end_page = int(get_num_of_items() / 200) # Use 1 for testing, don't hammer the API
+end_page = int(get_num_of_items() / 200)  # Use 1 for testing, don't hammer the API
 
 # Initialize a list we'll store all the item data in.
 items = []
 
-per_page = 200 # Use 5 for testing
+per_page = 200  # Use 5 for testing
 highlight = 0
 
 # Provide a list of fields you want the API NOT TO return.
@@ -58,7 +58,7 @@ url = f'https://learning.oreilly.com/api/v2/search/?query=*&formats=book&limit={
 
 while current_page is not end_page + 1:
     # Make the call, store reply from API in response.
-    if header: # If we have an API key, use it.
+    if header:  # If we have an API key, use it.
         response = requests.get(url, headers=header)
     else:
         response = requests.get(url)
@@ -91,6 +91,11 @@ while current_page is not end_page + 1:
     sleep(1)
 
 # Write the list to a file as JSON.
-file = "oreilly.json"
-with open(os.path.join(file), 'a+', encoding='utf-8', errors="replace") as outfile:
+FILE = "oreilly.json"
+with open(
+    os.path.join(FILE),
+    'a+',
+    encoding='utf-8',
+    errors="replace"
+) as outfile:
     json.dump(items, outfile, indent=2)

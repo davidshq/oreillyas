@@ -10,6 +10,7 @@ neo4j = "*"
 opensearch-py = "*"
 
 [dev-packages]
+types-requests = "*"
 
 [requires]
 python_version = "3.10"
